@@ -1,46 +1,46 @@
-# Getting Started with Create React App
+### 测试 react 组件的步骤详解
+1. 安装相应的包
+```js
+npm install -D enzyme @types/enzyme enzyme-adapter-react-16 @types/enzyme-adapter-react-16
+```
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+2. 在 src/setupTests.ts 中配置适配器
+```js
+import Enzyme from 'enzyme';
+import Adaptor from 'enzyme-adapter-react-16'; // enzyme 兼容 react-16
+// import Adaptor from '@wojtekmaj/enzyme-adapter-react-17' // enzyme 兼容 react-17
+Enzyme.configure({ adapter: new Adaptor() });
+```
 
-## Available Scripts
+3. 在 __tests__ 下生成测试文件，文件内部形如：
+```js
+import Message from '../components/Message'
+import { shallow } from 'enzyme'
 
-In the project directory, you can run:
+test('测试 Message', () => {
+  const message = '测试内容'
+  const wrapper = shallow(<Message message={message} />)
 
-### `yarn start`
+  // 如果有一个元素，find 返回该元素；
+  // 如果有多个元素，find 找到的是一个列表，可通过 at 方法获取第 n 个
+  const li = wrapper.find('li')
+  expect(li).toHaveLength(1)
+  expect(li.at(0).text()).toBe(message)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+  expect(li.prop('className')).toBe('list-item') // 获取属性值
+})
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### enzyme 中 shallow、mount、render 的区别
+shallow 生成的是 react 树，它只能对当前组件进行断言
+mount 生成的是 react 树，它能对当前组件及其子组件进行断言
+render 生成的是普通 html 结构
 
-### `yarn test`
+mount 对比 shallow 耗时更长、占用的内存也更多，所以当 shallow 能满足需求时，优先选用 shallow
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+### 测试组件的角度
+1. 测试元素是否正常生成
+2. 测试组件的初始状态是否正确
+3. 测试组件向子组件传递的状态是否正确
+4. 测试自身交互之后，ui 或者状态是否正确
+5. 测试其他组件交互后，当前组件的 ui 或者状态是否正确
